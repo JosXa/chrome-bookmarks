@@ -2,7 +2,7 @@
 // Keyword: bm
 
 import "@johnlindquist/kit"
-import { join } from "path"
+import { join } from "node:path"
 import type { Choice } from "@johnlindquist/kit"
 import sqlite3 from "sqlite3"
 import type { Bookmark, Folder, Root } from "../lib/models"
@@ -55,7 +55,7 @@ function buildChoices() {
 
   // Adding a "go back" option if there is a history in the stack
   if (historyStack.length > 0) {
-    choices = [{ name: "⤴️ ..", description: "Go back", value: "go-back" }, ...choices]
+    choices = [{ name: "⤴ ..", description: "Go back", value: "go-back" }, ...choices]
   }
 
   return choices
@@ -84,7 +84,7 @@ while (true) {
   )
 
   if (lastSelection === "go-back") {
-    bookmarks = historyStack.pop()
+    bookmarks = historyStack.pop()!
     continue
   }
 
@@ -93,7 +93,7 @@ while (true) {
   if (type === "folder") {
     // push the old bookmarks into the stack
     historyStack.push(bookmarks)
-    bookmarks = bookmarks.find((bookmark) => bookmark.name === name).children
+    bookmarks = bookmarks.find((bookmark) => bookmark.name === name)!.children ?? []
     continue
   }
 
@@ -156,7 +156,7 @@ async function loadFavicons(faviconsDbFile: string, allowCached = true) {
     db.all<{ page_url: string; image_data: Buffer }>(
       "SELECT page_url, image_data FROM icon_mapping INNER JOIN favicons ON favicons.id = icon_mapping.icon_id INNER JOIN main.favicon_bitmaps fb on favicons.id = fb.icon_id",
       [],
-      async (err, rows) => {
+      (err, rows) => {
         if (err) {
           if ("code" in err && err.code === "SQLITE_BUSY") {
             resolve("locked")
@@ -171,7 +171,7 @@ async function loadFavicons(faviconsDbFile: string, allowCached = true) {
 
   db.close()
 
-  setHint(undefined)
+  setHint("")
 
   if (result === "locked") {
     return await databaseLockedPrompt(faviconsDbFile)
@@ -204,7 +204,7 @@ async function databaseLockedPrompt(faviconsDbFile: string) {
     ],
   )
 
-  setHint(null)
+  setHint("")
 
   switch (choice) {
     case "without":
