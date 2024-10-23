@@ -5,7 +5,7 @@ import "@johnlindquist/kit"
 import { join } from "node:path"
 import type { Choice } from "@johnlindquist/kit"
 import sqlite3 from "sqlite3"
-import type { Bookmark, Folder, Root } from "../lib/models"
+import type { Bookmark, Folder, Root } from "../lib/models.ts"
 
 const SUPPORTED_BROWSERS = ["Chrome", "Vivaldi"] as const
 type SupportedBrowser = (typeof SUPPORTED_BROWSERS)[number]
@@ -101,8 +101,6 @@ while (true) {
     exec(`open "${lastSelection.url}"`)
     break
   }
-
-  console.log("Unknown type", type)
 }
 
 function getBrowserInstallationFiles(browserKind: SupportedBrowser) {
